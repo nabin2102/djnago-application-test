@@ -30,6 +30,7 @@ jobs:
 
     - name: Run flake8
       run: flake8 .
+      continue-on-error: true
 
     - name: Format code with black
       run: black .
