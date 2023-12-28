@@ -21,7 +21,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: '3.8'
+        python-version: '3.8' # Adjust the Python version as needed
 
     - name: Install flake8 and black
       run: |
@@ -30,23 +30,23 @@ jobs:
 
     - name: Run flake8
       run: flake8 .
-      continue-on-error: true
+      continue-on-error: true # Continue even if flake8 fails
 
     - name: Format code with black
       run: black .
 
     - name: Commit and push changes
       run: |
-        git config --global user.name 'Your Name'
-        git config --global user.email 'your-email@example.com'
+        git config --global user.name 'Your Name' # Replace with your name
+        git config --global user.email 'your-email@example.com' # Replace with your email
         git commit -am "Format Python code with black" || echo "No changes to commit"
         git push origin HEAD:${{ github.head_ref }}
 
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v3
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.PAT_TOKEN }} # Replace with your secret token name
         branch: ${{ github.head_ref }}
         title: "Apply code formatting"
         body: "This is an auto-generated PR with code formatting changes."
-        base: ${{ github.head_ref }}
+        base: ${{ github.base_ref }}
