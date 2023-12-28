@@ -17,6 +17,9 @@ jobs:
     steps:
     - name: Check out the repository
       uses: actions/checkout@v2
+      with:
+        token: ${{ secrets.MY_PERSONAL_TOKEN }} # Use PAT for checkout
+        ref: ${{ github.head_ref }}
 
     - name: Set up Python
       uses: actions/setup-python@v2
@@ -37,16 +40,9 @@ jobs:
 
     - name: Commit and push changes
       run: |
-        git config --global user.name 'GitHub actions' # Replace with your name
-        git config --global user.email 'git.hubactions#gmail.com' # Replace with your email
+        git config --global user.name 'GitHub Actions'
+        git config --global user.email 'your-email@example.com' # Replace with a valid email
         git commit -am "Format Python code with black" || echo "No changes to commit"
         git push origin HEAD:${{ github.head_ref }}
-
-    - name: Create Pull Request
-      uses: peter-evans/create-pull-request@v3
-      with:
-        token: ${{ secrets.MY_PERSONAL_TOKEN }} # Replace with your secret token name
-        branch: ${{ github.head_ref }}
-        title: "Apply code formatting"
-        body: "This is an auto-generated PR with code formatting changes."
-        base: ${{ github.base_ref }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.MY_PERSONAL_TOKEN }} # Use PAT for pushing changes
