@@ -9,6 +9,8 @@ on:
   pull_request:
     branches:
       - main
+env:
+  github_token: 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;
 
 jobs:
   run-linters:
