@@ -9,31 +9,35 @@ on:
   pull_request:
     branches:
       - main
-env:
-  github_token: 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;
-
 jobs:
-  run-linters:
-    name: Run linters
+  lint_and_format:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out Git repository
-        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v2
 
       - name: Set up Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: 3.8  # Change this to your desired Python version
 
-      - name: Install Python dependencies
-        run: pip install black flake8
+      - name: Install dependencies
+        run: pip install flake8 black
 
-      - name: Run linters
-        uses: wearerequired/lint-action@v2
-        with:
-          auto_fix: true
-          black: true
-          black_auto_fix: true
-          flake8: true
-          flake8_auto_fix: false
+      - name: Run Flake8
+        run: flake8
+
+      - name: Run Black
+        run: black .
+
+      - name: Commit formatted code
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add .
+          git commit -m "Auto-format code using Black"
+          git remote set-url origin "https://github.com/${GITHUB_REPOSITORY}.git"
+          git push --set-upstream origin ${{ github.ref }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
