@@ -7,7 +7,6 @@ on:
   pull_request:
     branches:
       - main
-
 jobs:
   lint-and-format:
     runs-on: ubuntu-latest
@@ -16,24 +15,17 @@ jobs:
     - name: Check out the repository
       uses: actions/checkout@v2
       with:
-        token: ${{ secrets.MY_PERSONAL_TOKEN }} # Use your PAT for checkout
-        ref: ${{ github.head_ref }}
+        token: ${{ secrets.MY_PERSONAL_TOKEN }}
 
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: '3.8' # Adjust the Python version as needed
+        python-version: '3.8'
 
     - name: Install flake8 and black
       run: |
         python -m pip install --upgrade pip
         pip install flake8 black
-
-    - name: Run flake8 and capture output
-      id: flake8
-      run: |
-        flake8_output=$(flake8 . 2>&1 || true)
-        echo "::set-output name=output::$flake8_output"
 
     - name: Format code with black
       run: black .
@@ -41,25 +33,30 @@ jobs:
     - name: Commit and push changes
       run: |
         git config --global user.name 'GitHub Actions'
-        git config --global user.email 'your-email@example.com' # Replace with a valid email
+        git config --global user.email 'your-email@example.com'
         git commit -am "Format Python code with black" || echo "No changes to commit"
         git push origin HEAD:${{ github.head_ref }}
       env:
-        GITHUB_TOKEN: ${{ secrets.MY_PERSONAL_TOKEN }} # Use your PAT for pushing changes
+        GITHUB_TOKEN: ${{ secrets.MY_PERSONAL_TOKEN }}
 
-    - name: Comment flake8 report on PR
-      if: github.event_name == 'pull_request' && steps.flake8.outputs.output != ''
+    - name: Run flake8 and comment on PR
+      if: github.event_name == 'pull_request'
       uses: actions/github-script@v5
       with:
-        github-token: ${{ secrets.MY_PERSONAL_TOKEN }} # Use your PAT here
+        github-token: ${{ secrets.MY_PERSONAL_TOKEN }}
         script: |
-          const output = `${{ steps.flake8.outputs.output }}`;
-          if (output) {
-            const issue_number = context.issue.number;
-            github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: issue_number,
-              body: `## Flake8 Report\n\`\`\`\n${output}\n\`\`\``
-            });
+          const execSync = require('child_process').execSync;
+          let flake8Output;
+          try {
+            execSync('flake8 .', { stdio: 'pipe' });
+            flake8Output = 'No issues found by flake8.';
+          } catch (error) {
+            flake8Output = error.stdout.toString();
           }
+          const issue_number = context.issue.number;
+          github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: issue_number,
+            body: `## Flake8 Report\n\`\`\`\n${flake8Output}\n\`\`\``
+          });
