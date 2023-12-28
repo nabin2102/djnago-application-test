@@ -39,6 +39,10 @@ jobs:
           SOURCE_BRANCH=${{ github.head_ref }}
           git fetch origin $SOURCE_BRANCH:$SOURCE_BRANCH
 
+      - name: Checkout source branch
+        run: |
+          git checkout $SOURCE_BRANCH
+
       - name: Commit formatted code
         run: |
           git config --global user.name "GitHub Actions"
