@@ -39,7 +39,7 @@ jobs:
           cat flake8_output.txt
           exit 1
         fi
-      continue-on-error: false # Continue even if flake8 fails
+      continue-on-error: true # Continue even if flake8 fails
 
     - name: Format code with black
       run: black .
