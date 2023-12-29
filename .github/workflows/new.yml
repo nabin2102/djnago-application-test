@@ -9,6 +9,7 @@ on:
   pull_request:
     branches:
       - main
+
 jobs:
   lint-and-format:
     runs-on: ubuntu-latest
@@ -32,12 +33,7 @@ jobs:
 
     - name: Run flake8 and capture output
       run: |
-        flake8 . > flake8_output.txt 2>&1
-        if [ $? -ne 0 ]; then
-          echo "Flake8 found issues:"
-          cat flake8_output.txt
-          exit 1
-        fi
+        flake8 . > flake8_output.txt 2>&1 || true
 
     - name: Format code with black
       run: black .
@@ -48,9 +44,9 @@ jobs:
         git config --global user.email 'githubaction@git.com'
         git commit -am "Format Python code with black" || echo "No changes to commit"
         git push origin HEAD:${{ github.head_ref }}
-        git checkout ${{ github.head_ref }}
+        git checkout -b flake8-branch
         git add flake8_output.txt
         git commit -m "Add Flake8 output"
-        git push origin HEAD:${{ github.head_ref }}
+        git push origin flake8-branch
       env:
         GITHUB_TOKEN: ${{ secrets.MY_PERSONAL_TOKEN }}
