@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: lint-and-format
+        name: Lint and Format
+        entry: python ./lint_and_format.py
+        language: system
+        always_run: true
+        pass_filenames: false
