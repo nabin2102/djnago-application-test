@@ -1,0 +1,54 @@
+name: Lint and Format
+
+on:
+  # Trigger the workflow on push or pull request,
+  # but only for the main branch
+  push:
+    branches:
+      - dev
+  pull_request:
+    branches:
+      - dev
+
+jobs:
+  lint-and-format:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out the repository
+      uses: actions/checkout@v2
+      with:
+        token: ${{ secrets.MY_PERSONAL_TOKEN }} # Use PAT for checkout
+        ref: ${{ github.head_ref }}
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8' # Adjust the Python version as needed
+
+    - name: Install flake8 and black
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 black
+
+    - name: Run flake8
+      run: |
+        flake8 . > flake8_output.txt
+        if [ $? -ne 0 ]; then
+          echo "Flake8 found issues:"
+          cat flake8_output.txt
+          exit 1
+        fi
+      continue-on-error: false # Continue even if flake8 fails
+
+    - name: Format code with black
+      run: black .
+
+    - name: Commit and push changes
+      run: |
+        git config --global user.name 'GitHub Actions'
+        git config --global user.email 'githubaction@git.com' # Replace with a valid email
+        git commit -am "Format Python code with black" || echo "No changes to commit"
+        git push origin HEAD:${{ github.head_ref }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.MY_PERSONAL_TOKEN }} # Use PAT for pushing changes
